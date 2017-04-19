@@ -88,6 +88,9 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @Inject
     private Event<DocumentRevisionEvent> documentRevisionEvent;
 
+    @Inject
+    private IProductManagerLocal productManager;
+
     private static final Logger LOGGER = Logger.getLogger(DocumentManagerBean.class.getName());
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -642,9 +645,10 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public DocumentRevision createDocumentMaster(String pParentFolder, String pDocMId, String pTitle, String pDescription, String pDocMTemplateId, String pWorkflowModelId, Map<String, String> aclUserEntries, Map<String, String> aclGroupEntries, Map<String, Collection<String>> userRoleMapping, Map<String, Collection<String>> groupRoleMapping) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, NotAllowedException, FolderNotFoundException, DocumentMasterTemplateNotFoundException, FileAlreadyExistsException, CreationException, DocumentRevisionAlreadyExistsException, RoleNotFoundException, WorkflowModelNotFoundException, DocumentMasterAlreadyExistsException, UserGroupNotFoundException, WorkspaceNotEnabledException {
+    public DocumentRevision createDocumentMaster(String pParentFolder, String pDocMId, String pTitle, String pDescription, String pDocMTemplateId, String pWorkflowModelId, Map<String, String> aclUserEntries, Map<String, String> aclGroupEntries, Map<String, Collection<String>> userRoleMapping, Map<String, Collection<String>> groupRoleMapping) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, NotAllowedException, FolderNotFoundException, DocumentMasterTemplateNotFoundException, FileAlreadyExistsException, CreationException, DocumentRevisionAlreadyExistsException, RoleNotFoundException, WorkflowModelNotFoundException, DocumentMasterAlreadyExistsException, UserGroupNotFoundException, WorkspaceNotEnabledException, PartMasterNotFoundException, UserNotActiveException {
 
-        User user = userManager.checkWorkspaceWriteAccess(Folder.parseWorkspaceId(pParentFolder));
+        String workspaceId = Folder.parseWorkspaceId(pParentFolder);
+        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
         Locale locale = new Locale(user.getLanguage());
         checkNameValidity(pDocMId, locale);
 
@@ -685,6 +689,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
                 InstanceAttribute attr = attrTemplate.createInstanceAttribute();
                 attrs.add(attr);
             }
+            productManager.validatePartNumberAttributes(workspaceId, attrs);
             newDoc.setInstanceAttributes(attrs);
 
             BinaryResourceDAO binDAO = new BinaryResourceDAO(locale, em);
@@ -1385,8 +1390,9 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public DocumentRevision updateDocument(DocumentIterationKey iKey, String pRevisionNote, List<InstanceAttribute> pAttributes, DocumentRevisionKey[] pLinkKeys, String[] documentLinkComments) throws WorkspaceNotFoundException, NotAllowedException, DocumentRevisionNotFoundException, AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        DocumentRevisionKey rKey = new DocumentRevisionKey(iKey.getWorkspaceId(), iKey.getDocumentMasterId(), iKey.getDocumentRevisionVersion());
+    public DocumentRevision updateDocument(DocumentIterationKey iKey, String pRevisionNote, List<InstanceAttribute> pAttributes, DocumentRevisionKey[] pLinkKeys, String[] documentLinkComments) throws WorkspaceNotFoundException, NotAllowedException, DocumentRevisionNotFoundException, AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, PartMasterNotFoundException {
+        String workspaceId = iKey.getWorkspaceId();
+        DocumentRevisionKey rKey = new DocumentRevisionKey(workspaceId, iKey.getDocumentMasterId(), iKey.getDocumentRevisionVersion());
         User user = checkDocumentRevisionWriteAccess(rKey);
         Locale userLocale = new Locale(user.getLanguage());
 
@@ -1417,11 +1423,12 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
             }
 
             if (pAttributes != null) {
-                List<InstanceAttribute> currentAttrs = doc.getInstanceAttributes();
-                boolean valid = AttributesConsistencyUtils.hasValidChange(pAttributes, docR.isAttributesLocked(), currentAttrs);
+                List<InstanceAttribute> currentAttributes = doc.getInstanceAttributes();
+                boolean valid = AttributesConsistencyUtils.hasValidChange(pAttributes, docR.isAttributesLocked(), currentAttributes);
                 if (!valid) {
                     throw new NotAllowedException(userLocale, "NotAllowedException59");
                 }
+                productManager.validatePartNumberAttributes(workspaceId, pAttributes);
                 doc.setInstanceAttributes(pAttributes);
             }
 
@@ -1440,7 +1447,8 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentRevision[] createDocumentRevision(DocumentRevisionKey pOriginalDocRPK, String pTitle, String pDescription, String pWorkflowModelId, Map<String, String> aclUserEntries, Map<String, String> aclGroupEntries, Map<String, Collection<String>> userRoleMapping, Map<String, Collection<String>> groupRoleMapping) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, NotAllowedException, DocumentRevisionAlreadyExistsException, CreationException, WorkflowModelNotFoundException, RoleNotFoundException, DocumentRevisionNotFoundException, FileAlreadyExistsException, UserGroupNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceWriteAccess(pOriginalDocRPK.getDocumentMaster().getWorkspace());
+        String workspaceId = pOriginalDocRPK.getDocumentMaster().getWorkspace();
+        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
         Locale locale = new Locale(user.getLanguage());
         DocumentRevisionDAO docRDAO = new DocumentRevisionDAO(locale, em);
         DocumentRevision originalDocR = docRDAO.loadDocR(pOriginalDocRPK);

@@ -622,7 +622,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Path data master id") @PathParam("pathDataId") int pathDataId,
-            @ApiParam(required = true, value = "Path data iteration to create") PathDataIterationCreationDTO pathDataIterationCreationDTO) throws UserNotFoundException, AccessRightException, UserNotActiveException, ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException, PathDataAlreadyExistsException, FileAlreadyExistsException, CreationException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, BaselineNotFoundException, PathDataMasterNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            @ApiParam(required = true, value = "Path data iteration to create") PathDataIterationCreationDTO pathDataIterationCreationDTO) throws UserNotFoundException, AccessRightException, UserNotActiveException, ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException, PathDataAlreadyExistsException, FileAlreadyExistsException, CreationException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, BaselineNotFoundException, PathDataMasterNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException, PartMasterNotFoundException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -699,7 +699,7 @@ public class ProductInstancesResource {
             throws UserNotFoundException, AccessRightException, UserNotActiveException,
             ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException,
             PathDataAlreadyExistsException, FileAlreadyExistsException, CreationException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException, PartMasterNotFoundException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -749,7 +749,7 @@ public class ProductInstancesResource {
             throws UserNotFoundException, AccessRightException, UserNotActiveException,
             ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException,
             PathDataAlreadyExistsException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            DocumentRevisionNotFoundException, WorkspaceNotEnabledException, PartMasterNotFoundException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();

@@ -511,7 +511,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part to create") PartCreationDTO partCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException {
+            NotAllowedException, UserNotActiveException {
 
         String pWorkflowModelId = partCreationDTO.getWorkflowModelId();
         RoleMappingDTO[] roleMappingDTOs = partCreationDTO.getRoleMapping();
