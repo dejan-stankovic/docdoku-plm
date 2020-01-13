@@ -129,21 +129,21 @@ public class DocumentUserACLTest {
     }
 
     @AfterClass
-    public static void deleteWorkspace() throws ApiException {
+    public static void assertValuesAndDeleteWorkspace() throws ApiException {
 
-        assertDocumentsRetrieval(user1Client);
-        assertDocumentsRetrieval(user2Client);
-
-        workspacesApi.deleteWorkspace(workspace.getId());
-    }
-
-    private static void assertDocumentsRetrieval(ApiClient client) throws ApiException {
-        DocumentsApi documentsApi = new DocumentsApi(client);
+        DocumentsApi documentsApi = new DocumentsApi(user1Client);
         int documentsInWorkspaceCount = documentsApi.getDocumentsInWorkspaceCount(workspace.getId()).getCount();
         List<DocumentRevisionDTO> documentsInWorkspace = documentsApi.getDocumentsInWorkspace(workspace.getId(), 0, documentsInWorkspaceCount);
         Assert.assertFalse(documentsInWorkspace.isEmpty());
         Assert.assertEquals(documentsInWorkspaceCount, documentsInWorkspace.size());
-    }
 
+        documentsApi = new DocumentsApi(user2Client);
+        documentsInWorkspaceCount = documentsApi.getDocumentsInWorkspaceCount(workspace.getId()).getCount();
+        documentsInWorkspace = documentsApi.getDocumentsInWorkspace(workspace.getId(), 0, documentsInWorkspaceCount);
+        Assert.assertFalse(documentsInWorkspace.isEmpty());
+        Assert.assertNotEquals(documentsInWorkspaceCount, documentsInWorkspace.size());
+
+        workspacesApi.deleteWorkspace(workspace.getId());
+    }
 
 }
