@@ -237,14 +237,10 @@
         </dependencies>
     </dependencyManagement>
     <modules>
-
         <module>docdoku-api</module>
         <module>docdoku-api-java</module>
         <module>docdoku-api-js</module>
         <module>docdoku-cli</module>
-
-        <module>importer-attributes</module>
-
     </modules>
     <build>
         <pluginManagement>
